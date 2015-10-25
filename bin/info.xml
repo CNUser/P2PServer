@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config>
+	<serverIP>192.168.191.1</serverIP>
+	<serverPort>5678</serverPort>
+	<url>jdbc:mysql://127.0.0.1:3306/</url>
+	<dbname>userinfo</dbname>
+	<tablename>onlineinfo</tablename>
+	<user>root</user>
+	<password>xc123456</password>
+</config>
