@@ -34,7 +34,7 @@ public class RegisterForClientThread implements Runnable {
 			ResultSet rs = null;
 			String msg = queue.getMsg();
 			
-			if (null != msg) {
+			if (null != msg && !msg.equals("")) {
 				String[] data = msg.split(",");
 				// select * 
 				// from tablename
@@ -48,12 +48,12 @@ public class RegisterForClientThread implements Runnable {
 					// 进行插入操作
 					// insert into table
 					// values (ip, name, port, flag)
-					String sqlStmt = "insert into " + tablename + "values(?, ?, ?, ?)";
+					String sqlStmt = "insert into " + tablename + " values(?, ?, ?, ?)";
 					PreparedStatement ps = conn.prepareStatement(sqlStmt);
 					ps.setString(1, data[1]); // ip
 					ps.setString(2, data[0]); // name
-					ps.setString(3, data[3]); // port
-					ps.setBoolean(4, true);   // flag  
+					ps.setString(3, data[2]); // port
+					ps.setInt(4, 1);          // flag  
 					ps.executeUpdate();
 					ps.close();
 				}
@@ -62,10 +62,10 @@ public class RegisterForClientThread implements Runnable {
 					// update tablename
 					// set flag = true
 					// where ip = '...'
-					String sqlStmt = "update " + tablename + "set flag = ? where ipv4 = ?";
+					String sqlStmt = "update " + tablename + " set flag = ? where ipv4 = ?";
 					PreparedStatement ps = conn.prepareStatement(sqlStmt);
-					ps.setBoolean(4, true);
-					ps.setString(1, data[1]);
+					ps.setInt(1, 1);
+					ps.setString(2, data[1]);
 					ps.executeUpdate();
 					ps.close();
 				}

@@ -7,29 +7,34 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Set;
 
 import javax.swing.JOptionPane;
 
 import message.MessageQueue;
 import myutil.XMLUtil;
 import dboperation.*;
-import mainframe.FrameAapter;
+import mainframe.FrameAdapter;
 import mainframe.ServerFrame;
 
 public class MonitorThread extends Thread {
-	private FrameAapter frame;
+	private FrameAdapter frame;
 	private ServerSocket server;
 	private Socket socket;
 	private BufferedReader in;
 	private PrintWriter out;
 	private MessageQueue queue;
 	private String dividingLine = "*************************************\n";
-	private int port = Integer.parseInt(XMLUtil.getServerPort(XMLUtil.createDocument()));
+	private Hashtable<String, String> userTable;
 	
-	public  MonitorThread(FrameAapter frame, MessageQueue queue) {
+	public  MonitorThread(Socket socket, FrameAdapter frame, MessageQueue queue) {
 		// TODO Auto-generated constructor stub
 		this.queue = queue;
 		this.frame = frame;
+		this.socket = socket;
+		this.userTable = frame.getUserTable();
 		
 		try {			
 			
@@ -44,41 +49,40 @@ public class MonitorThread extends Thread {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		System.out.println(Thread.currentThread().getName());
-		try {
-			server = new ServerSocket(port);
-			frame.setText("启动服务，端口" + port +"\n");
-			frame.setText(dividingLine);
-			socket = server.accept();
-			
-			// 响应多个客户端同时要求
-			Thread newThread = new MonitorThread(this.frame, this.queue);
-			newThread.start();
-			
+//		System.out.println(Thread.currentThread().getName());
+		try {			
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
 			
 			String register = in.readLine();
 			
-			if (register.equalsIgnoreCase("register")) {
-				String msg = socket.getInetAddress().getHostName() + "," +
-							 socket.getInetAddress().getHostAddress() + "," +
-							 socket.getPort();
-				
+			if (register.startsWith("register") || register.startsWith("REGISTER")) {
 				// 设置frame的textarea的值
 				String text = socket.getInetAddress().getHostName() + "," +
 						      socket.getInetAddress().getHostAddress() + "," + " 发来注册请求\n" +
 						      dividingLine;
+				
 				frame.setText(text);
 				
-				// 向队列发送注册信息
-				queue.putMsg(msg);
 				// 读取服务器数据
 				String data = queryFromDB(socket.getInetAddress().getHostAddress());
 				// 并传送在线用户消息给注册用户
 				out.write(data);
+				
+				String receivePort = register.substring(8);
+				
+				String msg = socket.getInetAddress().getHostName() + "," +
+							 socket.getInetAddress().getHostAddress() + "," +
+							 receivePort;
+				
+				// 向队列发送注册信息
+				queue.putMsg(msg);
+				
+				userTable.put(socket.getInetAddress().getHostAddress(), msg);
+				
 				// RegisterForCLientThread处理消息
-				new RegisterForClientThread(queue);
+				RegisterForClientThread t = new RegisterForClientThread(queue);
+				t.run();
 			}
 			
 			out.flush();

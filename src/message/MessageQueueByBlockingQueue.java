@@ -20,14 +20,12 @@ public class MessageQueueByBlockingQueue implements MessageQueue {
 	public String getMsg() {
 		if (!msgQueue.isEmpty()) {
 			try {
-				msgQueue.take();
-				
+				String msg = msgQueue.take();
+				return msg;
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			
-			} finally {
-				return null;
 			}
 		}
 		

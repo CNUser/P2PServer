@@ -57,8 +57,10 @@ public class MySqlLinker implements ILDBLinker {
 		// TODO Auto-generated method stub
 		
 		try {
-			rs.close();
-			conn.close();
+			if (rs != null)
+				rs.close();
+			if (conn != null)
+				conn.close();
 			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "¹Ø±Õ´íÎó!\n" + e.toString(), "" +
@@ -73,7 +75,8 @@ public class MySqlLinker implements ILDBLinker {
 		// TODO Auto-generated method stub
 		
 		try {
-			conn.close();
+			if (conn != null)
+				conn.close();
 			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, "¹Ø±Õ´íÎó!\n" + e.toString(), "" +
